@@ -116,6 +116,7 @@ body {
     background: url(assets/drag-overlay.png);
     background-size: cover;
     z-index: 1000;
+    pointer-events: none;
 }
 
 .hidden {
