@@ -89,6 +89,8 @@ body {
     font-size: x-large;
     position: absolute;
     z-index: 500;
+    top: 80%;
+    left: 2%;
 }
 
 .fill {
