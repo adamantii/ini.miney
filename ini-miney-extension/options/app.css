@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap');
+
+:root {
+    color-scheme: dark;
+    --color-primary: #2096f3;
+    --color-primary-transparent: #2196f380;
+    --color-secondary: #1d4d72;
+    --color-bg-primary: #121212;
+    --color-bg-secondary: #1e1e1e;
+    --color-gray: #424242;
+    --color-error: #ff5252;
+    --header-height: 64px;
+}
+
+html {
+    color:  #fff;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    margin: 0;
+    background-color: var(--color-bg-primary);
+    font-size: 100%;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    background-color: var(--color-primary);
+    width: 100%;
+    height: var(--header-height);
+}
+
+.header-section {
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 20px;
+}
+
+.header-title {
+    font-size: 20px;
+    font-weight: 300;
+    color: #fff;
+    display: table;
+    margin: 0 auto;
+}
+
+.error {
+    display: flex;
+    justify-content: center;
+    height: var(--header-height);
+    font-size: 20px;
+    background-color: var(--color-error);
+    align-items: center;
+    width: inherit;
+    overflow: hidden;
+    max-height: 0;
+    transition: .3s ease-out;
+}
+
+.error-shown {
+    max-height: var(--header-height);
+    margin-top: var(--margin-secondary);
+    margin-bottom: var(--margin-secondary);
+}
+
+.main {
+    width: 75%;
+    aspect-ratio: 4/3;
+    margin: 5% auto;
+    background: url(assets/background.png);
+    background-size: cover;
+    position: relative;
+}
+
+.main * {
+    -webkit-user-drag: none;
+}
+
+.background {
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+}
+
+#folder-input {
+    color: transparent;
+    font-size: x-large;
+    position: absolute;
+    z-index: 500;
+}
+
+.fill {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.pixel {
+    image-rendering: pixelated;
+}
+
+.hover-overlay {
+    z-index: 2000;
+    pointer-events: none;
+}
+
+.drag-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: xxx-large;
+    background: url(assets/drag-overlay.png);
+    background-size: cover;
+    z-index: 1000;
+}
+
+.hidden {
+    display: none;
+}
