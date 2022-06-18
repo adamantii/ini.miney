@@ -4,7 +4,7 @@
         "noImplicitAny": true,
         "typeRoots": ["./typings"],
         "lib": ["DOM", "DOM.Iterable", "ESNext"],
-        "watch": true,
+        // "watch": true,
     },
     "include": ["ini-miney-extension/**/*"],
 }
