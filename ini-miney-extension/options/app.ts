@@ -5,43 +5,143 @@ interface File {
 }
 
 interface AOCharacter {
-    iniFile: File,
-    charPath: string,
+    dirPath?: string,
+    iniFile?: File,
+    iniData?: { [key: string]: any },
+}
+
+interface OLCharacter {
+    // id: number,
+    name: string,
+    namePlate: string,
+    side: 'defense' | 'prosecution' | 'witness' | 'counsel' | 'judge',
+    blipUrl: string,
+    iconUrl: string | null,
+    galleryImageUrl: string | null,
+    galleryAJImageUrl: string | null,
+    backgroundId: number,
+    limitWidth: boolean, // false
+    alignment: string | null,
+    offsetX: number,
+    offsetY: number,
+    poses: [
+        {
+            // id: number,
+            name: string,
+            idleImageUrl: string,
+            speakImageUrl: string,
+            isSpeedlines: boolean,
+            iconUrl: string,
+            states: [
+                {
+                    imageUrl: string,
+                    nextPoseDelay: number,
+                    noSpeakDelay: boolean,
+                }
+            ],
+            audioTicks: [
+                {
+                    fileName: string,
+                    volume: number,
+                    time: number,
+                }
+            ],
+            functionTicks: [
+                {
+                    functionName: "Shake" | "Flash",
+                    functionParam: "s" | "m" | "l",
+                    time: number,
+                }
+            ],
+        }
+    ],
+    bubbles: [
+        {
+            "name": string,
+            "imageUrl": string,
+            "soundUrl": string,
+            "duration": number,
+            "shake": boolean,
+        }
+    ],
 }
 
 function load() {
     const main = document.querySelector('.main');
 
-    function processFileList(files: Array<File> | FileList) {
+    function testRegex(str: string, re: RegExp): false | RegExpMatchArray {
+        const match = str.match(re);
+        if (!match) return false;
+        if (match[0] != match.input) return false;
+        return match;
+    }
+
+    function parseINI(str: string) {
+        const regex = {
+            section: /^\s*\[\s*([^\]]*)\s*\]\s*$/,
+            param: /^\s*([^=]+?)\s*=\s*(.*?)\s*$/,
+            comment: /^\s*;.*$/
+        };
+        const value: { [key: string]: any } = {};
+        const lines = str.split(/[\r\n]+/);
+        let section: string = null;
+        lines.forEach(function (line) {
+            if (regex.comment.test(line)) {
+                return;
+            } else if (regex.param.test(line)) {
+                const match = line.match(regex.param);
+                if (section) {
+                    value[section][match[1]] = match[2];
+                } else {
+                    value[match[1]] = match[2];
+                }
+            } else if (regex.section.test(line)) {
+                const match = line.match(regex.section);
+                value[match[1]] = {};
+                section = match[1];
+            } else if (line.length == 0 && section) {
+                section = null;
+            };
+        });
+        return value;
+    }
+
+    async function processFileList(files: Array<File> | FileList) {
         files = Array.from(files);
         console.log(files);
 
         const inis: AOCharacter[] = [];
-        files.forEach(file => {
+        for (let file of files) {
             file.relativePath = file.relativePath || file.webkitRelativePath;
             if (file.name === 'char.ini') {
-                const iniData: AOCharacter = {
-                    charPath: file.relativePath.slice(0, -9),
+                const characterData: AOCharacter = {
+                    dirPath: file.relativePath.slice(0, -9),
                     iniFile: file,
                 };
-                inis.push(iniData);
+
+                const text = await file.text();
+                characterData.iniData = parseINI(text);
+
+                inis.push(characterData);
             }
-        });
+        }
+
+        console.log(inis);
     }
 
     async function getFilesFromDataTransferItems(dataTransferItems: DataTransferItemList) {
-        const readFile = function(entry: FileSystemFileEntry, path = ''): Promise<File> {
+        const readFile = function (entry: FileSystemFileEntry, path = ''): Promise<File> {
             return new Promise((resolve, reject) => {
                 entry.file(file => {
                     file.relativePath = path + file.name;
-                    resolve(file)
+                    resolve(file);
                 }, (err) => {
-                    reject(err)
+                    reject(err);
                 })
             })
         }
 
-        const dirReadEntries = function(dirReader: FileSystemDirectoryReader, path: string): Promise<File[]> {
+        const dirReadEntries = function (dirReader: FileSystemDirectoryReader, path: string): Promise<File[]> {
             return new Promise((resolve, reject) => {
                 dirReader.readEntries(async entries => {
                     let files: File[] = []
@@ -55,8 +155,8 @@ function load() {
                 })
             })
         }
-        
-        const readDir = async function(entry: FileSystemDirectoryEntry, path: string): Promise<File[]> {
+
+        const readDir = async function (entry: FileSystemDirectoryEntry, path: string): Promise<File[]> {
             const dirReader = entry.createReader()
             const newPath = path + entry.name + '/'
             let files: File[] = []
@@ -68,7 +168,7 @@ function load() {
             return files
         }
 
-        const getFilesFromEntry = async function(entry: FileSystemEntry, path = ''): Promise<File[]> {
+        const getFilesFromEntry = async function (entry: FileSystemEntry, path = ''): Promise<File[]> {
             if (entry.isFile) {
                 const file = await readFile(entry as FileSystemFileEntry, path)
                 return [file]
@@ -114,6 +214,13 @@ function load() {
     folderInput.addEventListener('change', event => {
         processFileList(folderInput.files);
     });
+
+    const dialogueText = document.querySelector('.dialogue-text') as HTMLElement;
+    function setDialogueFontSize() {
+        dialogueText.style.setProperty('--dialogue-font-size', main.getClientRects()[0].height / 16 + 'px');
+    }
+    setDialogueFontSize();
+    window.addEventListener('resize', setDialogueFontSize);
 }
 
 window.addEventListener('load', load);
